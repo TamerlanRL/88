@@ -1,0 +1,95 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+class Transport {
+public:
+    double weight;
+    double maxSpeed;
+    double avgSpeed;
+    double costPer100Km;
+    Transport(double w, double maxS, double avgS, double cost) : weight(w), maxSpeed(maxS), avgSpeed(avgS), costPer100Km(cost) {}
+    virtual double CalculateComfort() = 0;
+};
+class PassengerCar : public Transport {
+public:
+    double maxBaggageWeight;
+    string ncapClass;
+    string bodyType;
+    int passengerCount;
+    string seatMaterial;
+    PassengerCar(double w, double maxS, double avgS, double cost, double maxBaggage, const string& ncap, const string& type, int passengers, const string& material)
+        : Transport(w, maxS, avgS, cost), maxBaggageWeight(maxBaggage), ncapClass(ncap), bodyType(type), passengerCount(passengers), seatMaterial(material) {}
+    double CalculateComfort() override {
+        double comfort = (passengerCount * 10) + (maxBaggageWeight / 10);
+        return comfort;
+    }
+};
+class Bus : public Transport {
+public:
+    int passengerCount;
+    bool hasAirConditioning;
+    bool recliningSeats;
+    bool goodView;
+    double maxBaggagePerPassenger;
+    Bus(double w, double maxS, double avgS, double cost, int passengers, bool ac, bool reclining, bool view, double maxBaggage)
+        : Transport(w, maxS, avgS, cost), passengerCount(passengers), hasAirConditioning(ac), recliningSeats(reclining), goodView(view), maxBaggagePerPassenger(maxBaggage) {}
+    double CalculateComfort() override {
+        double comfort = (passengerCount * 5) + (hasAirConditioning ? 20 : 0);
+        return comfort;
+    }
+};
+class Train : public Transport {
+public:
+    Train(double w, double maxS, double avgS, double cost)
+        : Transport(w, maxS, avgS, cost) {}
+    double CalculateComfort() override {
+        double comfort = 30;
+        return comfort;
+    }
+};
+class Metro : public Transport {
+public:
+    Metro(double w, double maxS, double avgS, double cost)
+        : Transport(w, maxS, avgS, cost) {}
+    double CalculateComfort() override {
+        double comfort = 40;
+        return comfort;
+    }
+};
+class RoutePlanner {
+public:
+    static Transport* FindBestTransport(const vector<Transport*>& transports) {
+        Transport* bestTransport = nullptr;
+        double bestComfort = -1;
+        for (Transport* t : transports) {
+            double comfort = t->CalculateComfort();
+            if (comfort > bestComfort) {
+                bestComfort = comfort;
+                bestTransport = t;
+            }
+        }
+        return bestTransport;
+    }
+};
+int main() {
+    vector<Transport*> transports;
+    transports.push_back(new PassengerCar(1500, 200, 80, 10, 50, "A", "Sedan", 5, "Leather"));
+    transports.push_back(new Bus(8000, 120, 60, 8, 50, true, true, true, 100));
+    transports.push_back(new Train(40000, 180, 120, 5));
+    transports.push_back(new Metro(50000, 80, 40, 2));
+    for (Transport* t : transports) {
+        double comfort = t->CalculateComfort();
+        cout << "Comfort for this transport: " << comfort << endl;
+    }
+    Transport* bestTransport = RoutePlanner::FindBestTransport(transports);
+    cout << "Best Transport for the Route:" << endl;
+    cout << "Weight: " << bestTransport->weight << " kg" << endl;
+    cout << "Max Speed: " << bestTransport->maxSpeed << " km/h" << endl;
+    cout << "Average Speed: " << bestTransport->avgSpeed << " km/h" << endl;
+    cout << "Cost per 100 km: $" << bestTransport->costPer100Km << endl;
+    cout << "Comfort: " << bestTransport->CalculateComfort() << endl;
+    for (Transport* t : transports) {
+        delete t;
+    }
+}
